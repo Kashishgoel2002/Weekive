@@ -1,11 +1,53 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
-	<Welcome />
+	<main
+		class="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-8 px-6 py-16 text-center"
+	>
+		<span
+			class="rounded-full bg-accent px-3 py-1 text-sm font-medium text-accent-foreground"
+		>
+			Foundation ready
+		</span>
+
+		<div class="space-y-3">
+			<h1 class="text-4xl font-semibold tracking-tight text-foreground">
+				Weekive
+			</h1>
+			<p class="text-base leading-relaxed text-muted-foreground">
+				The week you imagined, the week you lived — held gently, side by side.
+			</p>
+		</div>
+
+		<div
+			class="w-full rounded-3xl bg-card p-6 text-left"
+			style="box-shadow: var(--shadow-lifted);"
+		>
+			<p class="text-sm text-muted-foreground">This week</p>
+			<p class="mt-1 text-5xl font-semibold tracking-tight text-primary">
+				72%
+			</p>
+			<p class="mt-1 text-sm text-muted-foreground">
+				of the week you imagined, actually lived
+			</p>
+			<div class="mt-5 flex items-end justify-between gap-1.5">
+				<span class="h-6 flex-1 rounded-full bg-periwinkle/70"></span>
+				<span class="h-4 flex-1 rounded-full bg-lavender"></span>
+				<span class="h-8 flex-1 rounded-full bg-violet/80"></span>
+				<span class="h-3 flex-1 rounded-full bg-lavender"></span>
+				<span class="h-7 flex-1 rounded-full bg-pink/70"></span>
+				<span class="h-9 flex-1 rounded-full bg-violet"></span>
+				<span class="h-5 flex-1 rounded-full bg-blue/70"></span>
+			</div>
+			<p class="mt-4 text-sm italic text-pink">
+				You're moving toward yourself.
+			</p>
+		</div>
+
+		<p class="text-xs text-muted-foreground">
+			Milestone 1 · design tokens &amp; project foundation
+		</p>
+	</main>
 </Layout>
