@@ -1,0 +1,133 @@
+---
+/**
+ * TEMPORARY development harness for the domain/scoring layer (Milestone 2).
+ *
+ * Not part of the product. It runs a set of hand-computed assertions
+ * against the pure domain functions and renders pass/fail so the scoring
+ * rules in PRODUCT.md can be verified in the browser without a test runner.
+ *
+ * Remove this page (and the /dev folder) before launch — see Milestone 9.
+ */
+import Layout from "../../layouts/Layout.astro";
+import type { Week } from "../../lib/domain/types";
+import {
+  DAY_LABELS,
+  startOfWeek,
+  toDateKey,
+  weekKey,
+  weekStartFromKey,
+  dayOffset,
+  todayIndex,
+  isWeekComplete,
+  elapsedDays,
+} from "../../lib/domain/week";
+import {
+  cappedRatio,
+  activityRatio,
+  toPercent,
+  weeklyAccuracy,
+  dayAccuracy,
+} from "../../lib/domain/accuracy";
+
+type Result = { name: string; pass: boolean; detail: string };
+const results: Result[] = [];
+
+function check(name: string, got: unknown, want: unknown) {
+  const pass = JSON.stringify(got) === JSON.stringify(want);
+  results.push({ name, pass, detail: `got ${JSON.stringify(got)}, want ${JSON.stringify(want)}` });
+}
+
+function checkApprox(name: string, got: number, want: number) {
+  const pass = Math.abs(got - want) < 1e-9;
+  results.push({ name, pass, detail: `got ${got}, want ≈ ${want}` });
+}
+
+// --- Fixed calendar for deterministic results -----------------------------
+// July 2, 2026 is a Thursday → the week's Monday is June 29, 2026.
+const thursday = new Date(2026, 6, 2, 10, 0);
+const monday = new Date(2026, 5, 29, 10, 0);
+const tuesday = new Date(2026, 5, 30, 10, 0);
+const wednesday = new Date(2026, 6, 1, 10, 0);
+const sunday = new Date(2026, 6, 5, 10, 0);
+const nextMonday = new Date(2026, 6, 6, 10, 0);
+const prevSunday = new Date(2026, 5, 28, 10, 0);
+
+const week: Week = {
+  key: "2026-06-29",
+  activities: [
+    { id: "a", name: "Study", unit: "time", target: 240, day: 0, reality: 360 }, // over → cap 1
+    { id: "b", name: "Exercise", unit: "time", target: 45, day: 1, reality: 0 }, // 0
+    { id: "c", name: "Reading", unit: "time", target: 120, day: 2, reality: 90 }, // 0.75
+    { id: "d", name: "Yoga", unit: "time", target: 60, day: 5, reality: 0 }, // Saturday (future)
+  ],
+};
+const weekStart = weekStartFromKey(week.key);
+
+// --- week.ts ---------------------------------------------------------------
+check("startOfWeek(Thu) lands on Monday", startOfWeek(thursday).getDay(), 1);
+check("weekKey(Thu) → Monday's date", weekKey(thursday), "2026-06-29");
+check("toDateKey pads month/day", toDateKey(new Date(2026, 6, 5)), "2026-07-05");
+check("dayOffset Mon→Wed = 2", dayOffset(weekStart, wednesday), 2);
+check("todayIndex on Wed = 2", todayIndex(weekStart, wednesday), 2);
+check("todayIndex after week = null", todayIndex(weekStart, nextMonday), null);
+check("isWeekComplete on Sunday = false", isWeekComplete(weekStart, sunday), false);
+check("isWeekComplete next Monday = true", isWeekComplete(weekStart, nextMonday), true);
+check("elapsedDays on Monday = [0]", elapsedDays(weekStart, monday), [0]);
+check("elapsedDays on Wednesday = [0,1,2]", elapsedDays(weekStart, wednesday), [0, 1, 2]);
+check("elapsedDays before week = []", elapsedDays(weekStart, prevSunday), []);
+
+// --- accuracy.ts -----------------------------------------------------------
+check("cappedRatio caps over-target at 1", cappedRatio(360, 240), 1);
+check("cappedRatio partial = 0.75", cappedRatio(90, 120), 0.75);
+check("cappedRatio zero reality = 0", cappedRatio(0, 45), 0);
+check("cappedRatio zero target = 1 (guard)", cappedRatio(5, 0), 1);
+check("activityRatio caps over-performance", activityRatio(week.activities[0]), 1);
+check("weeklyAccuracy Mon (Study only) = 1", weeklyAccuracy(week, monday), 1);
+check("weeklyAccuracy Tue (1+0)/2 = 0.5", weeklyAccuracy(week, tuesday), 0.5);
+checkApprox("weeklyAccuracy Wed (1+0+0.75)/3", weeklyAccuracy(week, wednesday) ?? NaN, (1 + 0 + 0.75) / 3);
+check("weeklyAccuracy before week = null", weeklyAccuracy(week, prevSunday), null);
+check("weeklyAccuracy full week (1+0+0.75+0)/4", weeklyAccuracy(week, nextMonday), 0.4375);
+check("dayAccuracy Mon = 1", dayAccuracy(week, 0), 1);
+check("dayAccuracy Thu (no activities) = null", dayAccuracy(week, 3), null);
+check("toPercent rounds 0.5833 → 58", toPercent((1 + 0 + 0.75) / 3), 58);
+check("DAY_LABELS Monday-first", DAY_LABELS[0], "Mon");
+
+const passed = results.filter((r) => r.pass).length;
+const total = results.length;
+const allPass = passed === total;
+---
+
+<Layout title="Weekive · scoring harness">
+  <main class="mx-auto max-w-xl px-6 py-12">
+    <p class="text-sm text-muted-foreground">Temporary dev harness · Milestone 2</p>
+    <h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+      Domain scoring checks
+    </h1>
+
+    <div
+      class={`mt-4 rounded-2xl p-4 text-sm font-medium ${
+        allPass ? "bg-accent text-accent-foreground" : "bg-destructive/10 text-destructive"
+      }`}
+    >
+      {passed} / {total} checks passing{allPass ? " — all green" : " — see failures below"}
+    </div>
+
+    <ul class="mt-6 space-y-2">
+      {
+        results.map((r) => (
+          <li class="rounded-xl bg-card p-3" style="box-shadow: var(--shadow-soft);">
+            <div class="flex items-start gap-2">
+              <span class={r.pass ? "text-violet" : "text-destructive"}>
+                {r.pass ? "✓" : "✗"}
+              </span>
+              <div>
+                <p class="text-sm text-foreground">{r.name}</p>
+                {!r.pass && <p class="mt-0.5 text-xs text-destructive">{r.detail}</p>}
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+</Layout>
