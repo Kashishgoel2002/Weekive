@@ -1,0 +1,15 @@
+---
+/**
+ * The application entry point.
+ *
+ * Mounts the React app root as a client-loaded island. All app state and
+ * routing (Setup vs Reality) live inside <App />; this page is just the
+ * host. The landing page (Milestone 8) will link here via "See your week".
+ */
+import Layout from "../../layouts/Layout.astro";
+import App from "../../components/app/App.tsx";
+---
+
+<Layout title="Weekive · your week">
+  <App client:load />
+</Layout>
