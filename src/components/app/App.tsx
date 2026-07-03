@@ -29,7 +29,7 @@ export default function App() {
             {!wk.isLoaded ? (
                 <LoadingState />
             ) : hasPlan && wk.week ? (
-                <RealityHome week={wk.week} accuracy={wk.accuracy} />
+                <RealityHome week={wk.week} accuracy={wk.accuracy} onAddReality={wk.addReality} />
             ) : (
                 <WeekSetup previousWeek={wk.previousWeek} onCommit={wk.createWeek} />
             )}

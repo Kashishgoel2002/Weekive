@@ -11,6 +11,17 @@ import type { DayIndex } from "./types";
 /** Short labels for the seven days, Monday-first. */
 export const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
+/** Full labels for the seven days, Monday-first. */
+export const DAY_FULL_LABELS = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+] as const;
+
 /** Whole calendar days between two dates, ignoring time-of-day and DST. */
 function daysBetween(from: Date, to: Date): number {
     const fromUTC = Date.UTC(from.getFullYear(), from.getMonth(), from.getDate());

@@ -43,3 +43,29 @@ export function formatAmount(amount: number, unit: Unit): string {
     if (unit === "time") return formatMinutes(amount);
     return String(Math.max(0, Math.round(amount)));
 }
+
+/** A single tap-to-log increment: the amount added and its short label. */
+export interface QuickAdd {
+    amount: number;
+    label: string;
+}
+
+/**
+ * The quick-add chips for a unit, straight from PRODUCT.md's card layout:
+ * time → +15m/+30m/+1h, count → +1/+2/+5. One tap records reality; there
+ * is never a save step.
+ */
+export function quickAddChips(unit: Unit): QuickAdd[] {
+    if (unit === "time") {
+        return [
+            { amount: 15, label: "+15m" },
+            { amount: 30, label: "+30m" },
+            { amount: 60, label: "+1h" },
+        ];
+    }
+    return [
+        { amount: 1, label: "+1" },
+        { amount: 2, label: "+2" },
+        { amount: 5, label: "+5" },
+    ];
+}
