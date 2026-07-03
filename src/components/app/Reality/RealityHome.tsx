@@ -4,9 +4,6 @@
  * Reality is the true home of the app (PRODUCT.md). The real logging and
  * reflection experience arrives in Milestones 6–7. For now this only
  * proves entry routing: it is shown when the current week has a plan.
- *
- * The "Clear plan" button is temporary routing-test scaffolding, not the
- * real Reality UI — it will be removed in a later milestone.
  */
 import type { Week } from "@/lib/domain/types";
 import { toPercent } from "@/lib/domain/accuracy";
@@ -14,10 +11,9 @@ import { toPercent } from "@/lib/domain/accuracy";
 interface RealityHomeProps {
     week: Week;
     accuracy: number | null;
-    onResetPlan: () => void;
 }
 
-export default function RealityHome({ week, accuracy, onResetPlan }: RealityHomeProps) {
+export default function RealityHome({ week, accuracy }: RealityHomeProps) {
     return (
         <section className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
             <span className="rounded-full bg-accent px-3 py-1 text-sm font-medium text-accent-foreground">
@@ -46,16 +42,6 @@ export default function RealityHome({ week, accuracy, onResetPlan }: RealityHome
                 </p>
             </div>
 
-            <button
-                type="button"
-                onClick={onResetPlan}
-                className="rounded-full bg-destructive/10 px-5 py-2.5 text-sm font-medium text-destructive"
-            >
-                Clear plan
-            </button>
-            <p className="text-xs text-muted-foreground">
-                Temporary — verifies routing returns to Week Setup when no plan exists.
-            </p>
         </section>
     );
 }
